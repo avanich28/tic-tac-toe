@@ -1,0 +1,377 @@
+@import url("https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap");
+
+/* The Mayer Reset */
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+  box-sizing: border-box;
+  /* Set default font */
+  font-family: "Gochi Hand", cursive, system-ui, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: var(--background-color);
+  color: var(--font-color);
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+:root {
+  --background-color: #402c2c;
+  --background-color-board: rgb(19, 19, 19);
+  --font-color: whitesmoke;
+  --color-x: #9a3529;
+  --color-y: #fbbf50;
+  --background-color-btn-hover: rgb(179, 176, 161);
+  --background-color-btn-active: rgba(151, 150, 145, 0.67);
+  --background-color-overlay: rgba(253, 253, 253, 0.5);
+  --color-win: greenyellow;
+  --color-lose: red;
+  --color-draw: rgb(153, 59, 220);
+}
+
+@keyframes moveDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(inherit);
+  }
+}
+
+@keyframes moveUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(inherit);
+  }
+}
+
+@keyframes expand {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes btnMark {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes markExpand {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomInZoomOut {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.game-container {
+  min-height: 600px;
+  padding-top: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.header {
+  animation: moveDown 2.5s forwards;
+}
+
+.game-name,
+.win,
+.game-over,
+.draw {
+  font-family: "Gochi Hand", cursive;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.win,
+.game-over,
+.draw,
+.try-again {
+  animation: zoomInZoomOut 0.9s infinite;
+}
+
+.try-again:active {
+  animation-play-state: paused;
+}
+
+.win {
+  color: var(--color-win);
+}
+
+.lose {
+  color: var(--color-lose);
+}
+
+.draw {
+  color: var(--color-draw);
+}
+
+.select-mark-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+}
+
+.radio--mark {
+  background-color: var(--background-color-board);
+  border-radius: 30px;
+  display: flex;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+label {
+  font-size: 2.4rem;
+  display: inline-block;
+  color: var(--background-color);
+  padding: 0 30px;
+  cursor: pointer;
+}
+
+input[type="radio"]:checked + label {
+  animation: btnMark 0.8s forwards;
+}
+
+input[type="radio"]:checked + .label-x {
+  border-radius: 30px 0 0 30px;
+  background-color: var(--color-x);
+  color: var(--font-color);
+}
+
+input[type="radio"]:checked + .label-o {
+  border-radius: 0 30px 30px 0;
+  background-color: var(--color-y);
+  color: var(--background-color-board);
+}
+
+.board {
+  width: 350px;
+  height: 350px;
+  background-color: var(--background-color-board);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: expand 2s forwards;
+}
+
+.row-1,
+.row-2,
+.row-3 {
+  height: calc(100% / 3);
+  display: flex;
+  gap: 5px;
+}
+
+.box {
+  width: calc(100% / 3);
+  background-color: var(--background-color);
+  font-size: 100px;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.x {
+  color: var(--color-x);
+}
+
+.o {
+  color: var(--color-y);
+}
+
+span {
+  animation: markExpand 2s forwards;
+}
+
+.restart {
+  animation: moveUp 2.5s forwards;
+}
+.btn--restart {
+  font-family: "Gochi Hand", cursive;
+  font-size: 1.8rem;
+  border: none;
+  border-radius: 18px;
+  padding: 2px 20px;
+  color: var(--background-color);
+  background-color: var(--font-color);
+  overflow: auto;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn--restart:hover {
+  transform: scale(1.05);
+  background-color: var(--background-color-btn-hover);
+}
+
+.btn--restart:active {
+  transform: scale(1);
+  background-color: var(--background-color-btn-active);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background-color-overlay);
+  z-index: 1;
+}

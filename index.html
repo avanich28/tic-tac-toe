@@ -15,33 +15,32 @@
           <div>Select your mark here :D</div>
           <div class="radio--mark">
             <input type="radio" name="mark" id="mark-x" checked />
-            <label for="mark-x" class="label-x">X</label>
+            <label for="mark-x" class="label label-x" value="x">X</label>
             <input type="radio" name="mark" id="mark-o" />
-            <label for="mark-o" class="label-o">O</label>
+            <label for="mark-o" class="label label-o" value="o">O</label>
           </div>
         </div>
       </div>
       <div class="board">
         <div class="row-1">
-          <div class="box x" data-box="1"><span>X</span></div>
-          <div class="box o" data-box="2">O</div>
-          <div class="box" data-box="3"></div>
+          <div class="box x" data-box="0"><span>X</span></div>
+          <div class="box o" data-box="1"><span>O</span></div>
+          <div class="box" data-box="2"></div>
         </div>
         <div class="row-2">
+          <div class="box" data-box="3"></div>
           <div class="box" data-box="4"></div>
           <div class="box" data-box="5"></div>
-          <div class="box" data-box="6"></div>
         </div>
         <div class="row-3">
+          <div class="box" data-box="6"></div>
           <div class="box" data-box="7"></div>
           <div class="box" data-box="8"></div>
-          <div class="box" data-box="9"></div>
         </div>
       </div>
       <div class="restart">
         <button class="btn--restart">RESTART</button>
       </div>
     </div>
-    <div class="overlay hidden"></div>
   </body>
 </html>

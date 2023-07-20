@@ -94,11 +94,17 @@ const controlDisplay = function (e) {
 
   // Re-set game
   clearGame();
+
+  // If player's mark is O, computer's X mark starts first.
+  if (player.mark === "o")
+    computer.choice.bind(computer, boxes[getRandomNum()], false)();
 };
 
 const controlPlayer = function (e) {
   player.choice.bind(player, e, true)();
+
   if (gameBoard.every((mark) => mark !== "")) return;
+
   setTimeout(
     () => computer.choice.bind(computer, boxes[getRandomNum()], false)(),
     SEC * 1000

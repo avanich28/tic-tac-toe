@@ -222,6 +222,10 @@ table {
   animation: moveDown 2.5s forwards;
 }
 
+.game-name {
+  animation: btnMark 1s forwards;
+}
+
 .game-name,
 .win,
 .game-over,
@@ -233,7 +237,7 @@ table {
 }
 
 .win,
-.game-over,
+.lose,
 .draw,
 .try-again {
   animation: zoomInZoomOut 0.9s infinite;

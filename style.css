@@ -278,6 +278,10 @@ table {
   transform: scale(1.03);
 }
 
+.radio--mark:active {
+  transform: scale(1);
+}
+
 input[type="radio"] {
   display: none;
 }
@@ -348,6 +352,7 @@ span {
 .restart {
   animation: moveUp 2.5s forwards;
 }
+
 .btn--restart {
   font-family: "Gochi Hand", cursive;
   font-size: 1.8rem;

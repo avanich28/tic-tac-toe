@@ -1,174 +1,232 @@
 "use strict";
 
-// gameBoard, displayController - module
-// player - factory
+function Player(mark) {
+  const getMark = () => mark;
 
-// game-name: Tic tAc toE
-// game-over: GAME OVER
-// win: WIN
-// draw: DRAW
-// .try-again: TRY AGAIN
-const resultEl = document.querySelector("h1");
-const btnMark = document.querySelector(".radio--mark");
-const btnRestart = document.querySelector(".btn--restart");
-const boxes = document.querySelectorAll(".box");
-const xMarkBtn = document.querySelector(".label-x");
-
-let gameBoard = new Array(9).fill("");
-let result;
-const MAX = 9;
-const SEC = 0.15;
-const LINES = 3;
-const DIAGONAL = 2;
-const GAME = "Tic tAc toE";
-
-function Person(mark) {
-  // const _score = [0, 0];
-  const choice = function (e, click = true) {
-    const target = !click ? e : e.target;
+  const choice = function (el) {
+    const target = el;
     if (target.textContent) return;
 
     const index = +target.dataset.box;
-    gameBoard[index] = this.mark;
+    model.gameBoard[index] = this.getMark();
 
-    displayMark(target, this.mark, index);
+    view.renderMark(target, this.getMark(), index);
   };
-  return { mark, choice };
+  return { getMark, choice };
 }
 
-const player = Person();
-const computer = Person();
+const model = (function () {
+  const _MAX = 9;
+  const _LINES = 3;
+  const _DIAGONAL = 2;
+  const gameBoard = new Array(9).fill("");
+  let player;
+  let computer;
 
-// Model
-const definePlayerMark = function (mark) {
-  const playerM = mark;
-  const computerM = playerM === "x" ? "o" : "x";
+  const _checkMark = function (arr, mark) {
+    return arr.every((x) => x === mark);
+  };
 
-  return { playerM, computerM };
-};
+  const checkTurn = function (curBoard) {
+    return curBoard.every((mark) => mark !== "");
+  };
 
-const convertToUpperCase = function (str) {
-  return str.replace("-", " ").toUpperCase();
-};
+  const convertToUpperCase = function (str) {
+    return str.replace("-", " ").toUpperCase();
+  };
 
-const getRandomNum = function () {
-  const choice = Math.trunc(Math.random() * MAX);
-  // BUG
-  if (gameBoard[choice]) return getRandomNum();
-  else return choice;
-};
+  const getRandomNum = function (curBoard) {
+    const choice = Math.trunc(Math.random() * _MAX);
+    // Recursive
+    if (curBoard[choice]) return getRandomNum(curBoard);
+    else return choice;
+  };
 
-const checkMark = function (arr, mark) {
-  return arr.every((x) => x === mark);
-};
+  const checkWinner = function (mark, curBoard) {
+    // Check row
+    for (let i = 0; i < _LINES; i++) {
+      const time = i * 3;
+      const arr = curBoard.slice(0 + time, 3 + time);
+      if (_checkMark(arr, mark)) return true;
+    }
 
-const checkWinner = function (gameBoard, mark) {
-  // Check row
-  for (let i = 0; i < LINES; i++) {
-    const time = i * 3;
-    const arr = gameBoard.slice(0 + time, 3 + time);
-    if (checkMark(arr, mark)) return true;
-  }
+    // Check column
+    for (let i = 0; i < _LINES; i++) {
+      const arr = curBoard.filter((_, index) => index % 3 === i);
+      if (_checkMark(arr, mark)) return true;
+    }
 
-  // Check column
-  for (let i = 0; i < LINES; i++) {
-    const arr = gameBoard.filter((_, index) => index % 3 === i);
-    if (checkMark(arr, mark)) return true;
-  }
+    // Check diagonal
+    for (let i = 0; i < _DIAGONAL; i++) {
+      const time = 2 * i + 2;
+      let arr = curBoard.filter((_, index) => index % time === 0);
+      if (i === 0) arr = arr.slice(1, -1);
+      if (_checkMark(arr, mark)) return true;
+    }
 
-  // Check diagonal
-  for (let i = 0; i < DIAGONAL; i++) {
-    const time = 2 * i + 2;
-    let arr = gameBoard.filter((_, index) => index % time === 0);
-    if (i === 0) arr = arr.slice(1, -1);
-    if (checkMark(arr, mark)) return true;
-  }
+    return false;
+  };
 
-  return false;
-};
-console.log(checkWinner(["o", "x", "x", "x", "x", "o", "o", "o", "o"], "o"));
+  // Prevent player to click on the board game
+  const removeClickEvent = function (el, func) {
+    el.removeEventListener("click", func);
+  };
 
-// View
-const displayMark = function (target, mark, i) {
-  const markup = `<span class="${mark}">${convertToUpperCase(mark)}</span>`;
-  target.innerHTML = markup;
+  // Add click event back
+  const addClickEvent = function (el, func) {
+    el.addEventListener("click", func);
+  };
 
-  gameBoard[i] = mark;
-};
+  return {
+    player,
+    computer,
+    gameBoard,
+    checkTurn,
+    convertToUpperCase,
+    getRandomNum,
+    checkWinner,
+    removeClickEvent,
+    addClickEvent,
+  };
+})();
 
-const displayResult = function (strResult) {
-  resultEl.classList.add(strResult);
-  resultEl.textContent = convertToUpperCase(strResult);
-  btnRestart.classList.toggle("try-again");
-  btnRestart.textContent = convertToUpperCase("try-again");
-  Array.from(boxes).forEach((box) =>
-    box.removeEventListener("click", controlPlayer)
-  );
-};
+const view = (function () {
+  const _resultEl = document.querySelector("h1");
+  const _btnMark = document.querySelector(".radio--mark"); // init
+  const _btnRestart = document.querySelector(".btn--restart");
+  const board = document.querySelector(".board");
+  const boxes = document.querySelectorAll(".box");
+  const GAME = "Tic tAc toE";
 
-const clearGame = function (result) {
-  resultEl.className = "game-name";
-  resultEl.textContent = GAME;
-  btnRestart.classList.remove("try-again");
-  btnRestart.textContent = convertToUpperCase("restart");
-  Array.from(boxes).forEach((box) =>
-    box.addEventListener("click", controlPlayer)
-  );
+  const addHandlerGame = function (handler) {
+    _btnMark.addEventListener("click", function (e) {
+      const btn = e.target.closest(".label");
+      if (!btn) return;
+      const mark = btn.getAttribute("value");
 
-  // BUG
-  gameBoard = gameBoard.map((mark) => (mark = ""));
-  Array.from(boxes).forEach((box) => (box.innerHTML = ""));
-};
+      handler(mark);
+    });
+  };
 
-// Controller
-const controlDisplay = function (e) {
-  const btn = e.target.closest(".label");
-  if (!btn) return;
+  const addHandlerPlayerMove = function (handler) {
+    board.addEventListener("click", handler);
+  };
 
-  const mark = btn.getAttribute("value");
+  const addHandlerRestart = function (handler) {
+    _btnRestart.addEventListener("click", handler);
+  };
 
-  // Define player mark
-  const { playerM, computerM } = definePlayerMark(mark);
-  player.mark = playerM;
-  computer.mark = computerM;
+  const renderMark = function (target, mark) {
+    const markup = `<span class="${mark}">${model.convertToUpperCase(
+      mark
+    )}</span>`;
+    target.innerHTML = markup;
+  };
 
-  // Re-set game
-  Array.from(boxes).forEach((box) =>
-    box.removeEventListener("click", controlPlayer)
-  );
-  clearGame();
+  const renderResult = function (strResult) {
+    _resultEl.classList.add(strResult);
+    _resultEl.textContent = model.convertToUpperCase(strResult);
+    _btnRestart.classList.add("try-again");
+    _btnRestart.textContent = model.convertToUpperCase("try-again");
+  };
 
-  // If player's mark is O, computer's X mark starts first.
-  if (player.mark === "o")
-    computer.choice.bind(computer, boxes[getRandomNum()], false)();
-};
+  const clearDisplay = function (func) {
+    _resultEl.className = "game-name";
+    _resultEl.textContent = GAME;
+    _btnRestart.classList.remove("try-again");
+    _btnRestart.textContent = model.convertToUpperCase("restart");
 
-const controlPlayer = function (e) {
-  player.choice.bind(player, e, true)();
-  if (checkWinner(gameBoard, player.mark)) return displayResult("win");
+    board.addEventListener("click", func);
 
-  if (gameBoard.every((mark) => mark !== "")) return displayResult("draw");
+    model.gameBoard = model.gameBoard.map((mark) => (mark = ""));
+    Array.from(boxes).forEach((box) => (box.innerHTML = ""));
+  };
 
-  setTimeout(() => {
-    computer.choice.bind(computer, boxes[getRandomNum()], false)();
-    if (checkWinner(gameBoard, computer.mark)) return displayResult("lose");
-  }, SEC * 1000);
-};
+  return {
+    boxes,
+    board,
+    addHandlerGame,
+    addHandlerPlayerMove,
+    addHandlerRestart,
+    renderMark,
+    renderResult,
+    clearDisplay,
+  };
+})();
 
-// Start
+const controller = (function () {
+  const controlGame = function (mark = "x") {
+    model.player = Player(mark);
+    model.computer = Player(mark === "x" ? "o" : "x");
+
+    // Reset game
+    model.removeClickEvent(view.board, game.playerMove);
+    view.clearDisplay(game.playerMove);
+
+    // If player's mark is O, computer's X mark starts first.
+    if (model.player.getMark() === "o")
+      model.computer.choice.bind(
+        model.computer,
+        view.boxes[model.getRandomNum(model.gameBoard)],
+        false
+      )();
+  };
+
+  const controlResult = function (str, el, func) {
+    view.renderResult(str);
+    model.removeClickEvent(el, func);
+  };
+
+  return { controlGame, controlResult };
+})();
+
+const game = (function () {
+  const _SEC = 0.15;
+
+  const _computerMove = function () {
+    setTimeout(() => {
+      model.computer.choice.bind(
+        model.computer,
+        view.boxes[model.getRandomNum(model.gameBoard)]
+      )();
+      if (model.checkWinner(model.computer.getMark(), model.gameBoard))
+        return controller.controlResult("lose", view.board, playerMove);
+
+      if (model.checkTurn(model.gameBoard))
+        return controller.controlResult("draw", view.board, playerMove);
+    }, _SEC * 1000);
+  };
+
+  const playerMove = function (e) {
+    // BUG receives argument 2 times if we use different name function when we remove/add EventListener(el, pointEvent obj)
+    const box = e.target.closest(".box");
+    if (!box) return;
+
+    // Player play
+    model.player.choice.bind(model.player, box)();
+    if (model.checkWinner(model.player.getMark(), model.gameBoard))
+      return controller.controlResult("win", view.board, playerMove);
+
+    if (model.checkTurn(model.gameBoard))
+      return controller.controlResult("draw", view.board, playerMove);
+
+    _computerMove();
+  };
+
+  return { playerMove };
+})();
+
 const init = function () {
-  // Render mark
-  Array.from(boxes).forEach((box) =>
-    box.addEventListener("click", controlPlayer)
-  );
+  // Render mark when click on board
+  view.addHandlerPlayerMove(game.playerMove);
 
   // Select mark & Restart
-  btnMark.addEventListener("click", controlDisplay);
+  view.addHandlerGame(controller.controlGame);
 
-  // Restart
-  btnRestart.addEventListener("click", () => xMarkBtn.click());
+  // Restart only
+  view.addHandlerRestart(controller.controlGame);
 
-  // Default start
-  xMarkBtn.click();
+  // Default Start
+  controller.controlGame();
 };
 init();
